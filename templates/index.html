@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call Transcript Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .table-container {
+            max-height: 350px;   /* Adjust height */
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;  /* Ensures equal column spacing */
+        }
+
+        th, td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            word-wrap: break-word; /* Wrap text in cells */
+        }
+
+        th {
+            background: #f4f4f4;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        /* Column widths */
+        th:nth-child(1), td:nth-child(1) { width: 5%; }   /* # */
+        th:nth-child(2), td:nth-child(2) { width: 15%; }  /* Timestamp */
+        th:nth-child(3), td:nth-child(3) { width: 35%; }  /* Transcript */
+        th:nth-child(4), td:nth-child(4) { width: 30%; }  /* Summary */
+        th:nth-child(5), td:nth-child(5) { width: 15%; }  /* Sentiment */
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .download-btn {
+            background: #007bff;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .download-btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1><center>📞 Customer Call Transcript Analyzer</h1>
+        <p>Upload customer call transcripts and get AI-powered summaries with sentiment analysis.</p>
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %} 
+
+        <form method="POST">
+            <label for="transcript">Customer Call Transcript:</label>
+            <textarea name="transcript" rows="8" placeholder="Paste your customer service call transcript here..."></textarea>
+            <button type="submit">🔍 Analyze Transcript</button>
+        </form>
+
+        {% if result %}
+        <div class="result">
+            <h2>Analysis Result</h2>
+            <p><strong>Summary:</strong> {{ result.summary }}</p>
+            <p><strong>Sentiment:</strong> {{ result.sentiment }}</p>
+            <p><strong>Analyzed:</strong> {{ result.timestamp }}</p>
+        </div>
+        {% endif %}
+
+        <div class="table-header">
+            <h2>📊 CSV Data</h2>
+            {% if table %}
+                <a href="{{ url_for('download_csv') }}" class="download-btn">⬇️ Download CSV</a>
+            {% endif %}
+        </div>
+
+        {% if table %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Timestamp</th>
+                        <th>Transcript</th>
+                        <th>Summary</th>
+                        <th>Sentiment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in table %}
+                    <tr class="{{ row['Sentiment']|lower }}">
+                        <td>{{ loop.index }}</td>
+                        <td>{{ row['Timestamp'] }}</td>
+                        <td>{{ row['Transcript'] }}</td>
+                        <td>{{ row['Summary'] }}</td>
+                        <td>{{ row['Sentiment'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <p>No CSV data found. Analyze some transcripts first!</p>
+        {% endif %}
+    </div>
+</body>
+</html>
